@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geo Location</title>
+</head>
+<body>
+    <button id="getLocation">Get Location</button>
+    <br>
+    <a href="#" id="locationResult" target="_blank"></a>
+
+     <p class="showDetails">User Location Details :</p>
+     <p class="fullAddress">User Address :</p>
+     <p class="formatedAddress">Formated Address</p>
+</body>
+<script>
+//   navigator.geolocation.getCurrentPosition((e)=>{console.log(e.coords.longitude, e.coords.latitude)});
+//    const sucess = (position)=>{
+//     console.log(position)
+//    }
+//    const unsucess = (err)=>{
+//     console.log(err.message)
+//    }
+
+//    navigator.permissions.query({name : 'geolocation'}).then((permissionsStatus)=>{
+//         if (permissionsStatus.state == 'denied') {
+//             if(confirm('please allow the location to continue')){
+//                 navigator.permissions.request({name : 'geolocation'}).then(
+//                     ()=> navigator.geolocation.getCurrentPosition(sucess,unsucess)
+//                 )
+//             }
+//         }
+//    })
+
+
+//project start
+//  function success(position){
+//     console.log(position);
+//  }
+//   navigator.geolocation.getCurrentPosition(success);
+
+const showDetails = document.querySelector('.showDetails');
+const locationResult = document.querySelector('#locationResult');
+const fullAddress = document.querySelector('.fullAddress');
+const  APIkey = "8201c04f133c4c0687ce0354a02507d8";
+const ApiEndPoint = 'https://api.opencagedata.com/geocode/v1/json';
+
+
+const getcurrentAddress = async (latitude,longitude)=>{
+    let query = `${latitude},${longitude}`;
+    let apiUrl = `${ApiEndPoint}?q=${query}&key=${APIkey}`;
+
+    try {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        const{city,state,road,suburb} = data.results[0].components;
+        fullAddress.textContent = `user address: ${road == 'unnamed road' ? '':road},${suburb},${city},${state}`;
+        console.log(data.results[0]);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+document.querySelector('#getLocation').addEventListener('click',()=>{
+    setTimeout(() => {
+        locationResult.textContent = 'Retrieving user location...' 
+    }, 2000);
+    
+
+
+    function sucess(position){
+       let {coords} = position;
+       locationResult.textContent = 'see my location on map...'
+       locationResult.href = `https://www.openstreetmap.org?mlat=${coords.latitude}&mlon=${coords.longitude}`;
+       showDetails.textContent = `latitude:${coords.latitude}</h3> and longitude:${coords.longitude}`;
+       let {latitude, longitude} = position.coords;
+       getcurrentAddress(latitude,longitude);
+    }
+    function err(msg){
+        console.log(msg);
+    }
+    
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(sucess,err);
+    }
+    
+});
+ 
+ 
+</script>
+</html>
